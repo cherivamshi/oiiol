@@ -82,6 +82,32 @@ const Tables = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchCurrentWeekData = async () => {
+      try {
+        const uid = window.sessionStorage.getItem('userId');
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1; // getMonth is 0-based
+        const weekNumber = Math.ceil(currentDate.getDate() / 7);
+        const weekKey = `Week${weekNumber}`;
+        const weekPath = `restaurants/${uid}/${year}/${month}/${weekKey}`;
+        const weekRef = collection(firebaseDb, weekPath);
+        const querySnapshot = await getDocs(weekRef);
+        const fetchedData = querySnapshot.docs.map((doc) => ({
+          key: doc.id,
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setWeekData(fetchedData);
+      } catch (error) {
+        console.error('Error fetching current week data:', error);
+      }
+    };
+
+    fetchCurrentWeekData();
+  }, []);
+
   const columns = [
     {
       title: 'Date',
@@ -154,32 +180,6 @@ const Tables = () => {
       },
     },
   ];
-
-  useEffect(() => {
-    const fetchCurrentWeekData = async () => {
-      try {
-        const uid = window.sessionStorage.getItem('userId');
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth() + 1; // getMonth is 0-based
-        const weekNumber = Math.ceil(currentDate.getDate() / 7);
-        const weekKey = `Week${weekNumber}`;
-        const weekPath = `restaurants/${uid}/${year}/${month}/${weekKey}`;
-        const weekRef = collection(firebaseDb, weekPath);
-        const querySnapshot = await getDocs(weekRef);
-        const weekData = querySnapshot.docs.map((doc) => ({
-          key: doc.id,
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setWeekData(weekData);
-      } catch (error) {
-        console.error('Error fetching current week data:', error);
-      }
-    };
-
-    fetchCurrentWeekData();
-  }, []);
 
   const components = {
     body: {
